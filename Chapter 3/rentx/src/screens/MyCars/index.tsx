@@ -1,10 +1,11 @@
-import { useNavigation } from "@react-navigation/core";
+import { useNavigation, useIsFocused } from "@react-navigation/core";
 import React, { useState, useEffect } from "react";
 import { FlatList, StatusBar } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useTheme } from "styled-components";
 import BackButton from "../../components/BackButton";
 import Car from "../../components/Car";
+import { Car as ModelCar } from "../../database/model/Car";
 import { CarDTO } from "../../dtos/CarDTO";
 import api from "../../services/api";
 
@@ -24,20 +25,21 @@ import {
   CarFooterDate,
 } from "./styles";
 import LoadAnimation from "../../components/LoadAnimation";
+import { format, parseISO } from "date-fns";
 
-interface CarProps {
+interface DataProps {
   id: string;
-  user_id: string;
-  car: CarDTO;
-  startDate: string;
-  endDate: string;
+  car: ModelCar;
+  start_date: string;
+  end_date: string;
 }
 
 const MyCars: React.FC = () => {
-  const [cars, setCars] = useState<CarProps[]>([]);
+  const [cars, setCars] = useState<DataProps[]>([]);
   const [loading, setLoading] = useState(true);
   const theme = useTheme();
   const navigation = useNavigation();
+  const isFocus = useIsFocused();
 
   function handleGoBack() {
     navigation.goBack();
@@ -46,9 +48,18 @@ const MyCars: React.FC = () => {
   useEffect(() => {
     async function fetchCars() {
       try {
-        const response = await api.get("/schedules_byuser?user_id=1");
+        const response = await api.get("/rentals");
 
-        setCars(response.data);
+        const dataFormattedCars = response.data.map((data: DataProps) => {
+          return {
+            id: data.id,
+            car: data.car,
+            start_date: format(parseISO(data.start_date), "dd/MM/yyyy"),
+            end_date: format(parseISO(data.end_date), "dd/MM/yyyy"),
+          };
+        });
+
+        setCars(dataFormattedCars);
       } catch (error) {
         console.log(error);
       } finally {
@@ -57,7 +68,7 @@ const MyCars: React.FC = () => {
     }
 
     fetchCars();
-  }, []);
+  }, [isFocus]);
 
   return (
     <Container>
@@ -87,18 +98,18 @@ const MyCars: React.FC = () => {
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
               <CarWrapper>
-                <Car data={item.car} enabled={false}/>
+                <Car data={item.car} enabled={false} />
                 <CarFooter>
                   <CarFooterTitle>Período</CarFooterTitle>
                   <CarFooterPeriod>
-                    <CarFooterDate>{item.startDate}</CarFooterDate>
+                    <CarFooterDate>{item.start_date}</CarFooterDate>
                     <AntDesign
                       name="arrowright"
                       size={20}
                       color={theme.colors.title}
                       style={{ marginHorizontal: 10 }}
                     />
-                    <CarFooterDate>{item.endDate}</CarFooterDate>
+                    <CarFooterDate>{item.end_date}</CarFooterDate>
                   </CarFooterPeriod>
                 </CarFooter>
               </CarWrapper>
