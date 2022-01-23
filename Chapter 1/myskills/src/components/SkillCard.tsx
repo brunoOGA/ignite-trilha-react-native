@@ -16,7 +16,7 @@ export function SkillCard({ skill, ...rest }: SkillCardProps) {
       style={styles.buttonSkill}
       {...rest }
     >
-      <Text style={styles.textSkill}>
+      <Text style={styles.textSkill} testID="text:SkillCard">
         {skill}
       </Text>
     </TouchableOpacity>

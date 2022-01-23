@@ -150,6 +150,7 @@ export function Register() {
             </TransactionsTypes>
 
             <CategorySelectButton
+              testID="button:CategorySelect" 
               title={category.name}
               onPress={handleOpenSelectCategoryModal}
             />
@@ -158,7 +159,7 @@ export function Register() {
           <Button title="Enviar" onPress={handleSubmit(handleRegister)} />
         </Form>
 
-        <Modal visible={categoryModalOpen}>
+        <Modal testID="modal:Category" visible={categoryModalOpen}>
           <CategorySelect
             category={category}
             setCategory={setCategory}
